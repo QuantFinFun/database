@@ -14,6 +14,8 @@ from tables.portfolio_optimization_dataset import (  # noqa: F401,E501  # pylint
     PortfolioOptimizationFullDataset, PortfolioOptimizationTrainingDataset)
 from tables.stock_price import \
     StockPriceDataset  # noqa: F401  # pylint: disable=unused-import
+from tables.treasury_table import \
+    USTreasuryDatabase  # noqa: F401  # pylint: disable=unused-import
 
 
 def main() -> None:
