@@ -4,35 +4,18 @@
 """
 __author__ = "Mohd Sadiq"
 __version__ = "v0.1"
-__script__ = "populate_database"
+__module__ = "populate_database"
 
-import logging
 from typing import List
 
 import pandas as pd
 
-from scripts import add_entry_to_database
+from scripts import add_entry_to_database, price_entry_json
 from scripts.stock_downloader import StockDownloader
 from tables.stock_price import StockPriceDataset
+from utils import build_logger
 
-# Logger Configuration
-logger = logging.getLogger("test")
-logFileFormatter = logging.Formatter(
-    fmt=(
-        f"%(levelname)s "
-        f"%(asctime)s "
-        f"(%(relativeCreated)d) \t "
-        f"%(pathname)s; Module_Name: {__name__}; "
-        f"F%(funcName)s L%(lineno)s - "
-        f"%(message)s"
-    ),
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-fileHandler = logging.FileHandler(filename=f"{__script__}_error.log")
-fileHandler.setFormatter(logFileFormatter)
-fileHandler.setLevel(level=logging.INFO)
-logger.addHandler(fileHandler)
-logger.addHandler(logging.StreamHandler())
+error_logger, console_logger = build_logger(__module__)
 
 
 def get_snp_500() -> List[str]:
@@ -59,24 +42,14 @@ def fill_database(tickers: List[str]) -> None:
         try:
             stock_history_objects = []
             for index, row in stock_price_history.iterrows():
-                entry_dict = {
-                    "date": index,
-                    "asset": asset,
-                    "open": float(row["Open"]),
-                    "high": float(row["High"]),
-                    "low": float(row["Low"]),
-                    "close": float(row["Close"]),
-                    "volume": int(row["Volume"]),
-                    "dividends": float(row["Dividends"]),
-                    "stock_split": float(row["Stock Splits"]),
-                }
+                entry_dict = price_entry_json(str(index), asset, row)
                 stock_price_entry = StockPriceDataset(**entry_dict)
                 stock_history_objects.append(stock_price_entry)
             add_entry_to_database(stock_history_objects)
         except Exception as error:  # pylint: disable=broad-except
-            logger.error("%s, %s", error, ticker)
+            error_logger.error("%s, %s", error, ticker)
 
-        logger.info("Finished Populating %s", asset)
+        console_logger.info("Finished Populating %s", asset)
 
 
 if __name__ == "__main__":

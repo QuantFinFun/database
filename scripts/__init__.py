@@ -24,3 +24,24 @@ def add_entry_to_database(objects: List[Any]):
     with Session(engine) as session:
         session.add_all(objects)
         session.commit()
+
+
+def price_entry_json(index: str, asset: str, row: Any):
+    """
+    This function builds a dictionary and returns it
+    to the respective scripts that need to populate according
+    to the price data
+    """
+    entry_dict = {
+        "date": index,
+        "asset": asset,
+        "open": float(row["Open"]),
+        "high": float(row["High"]),
+        "low": float(row["Low"]),
+        "close": float(row["Close"]),
+        "volume": int(row["Volume"]),
+        "dividends": float(row["Dividends"]),
+        "stock_split": float(row["Stock Splits"]),
+    }
+
+    return entry_dict
